@@ -1,6 +1,44 @@
+version: '3.9'
+
 services:
   web:
     build:
-      context: app
+      context: ./app
+      dockerfile: Dockerfile 
     ports:
       - "5000:5000"
+    depends_on:
+      - mysql
+
+  myadmin:
+    image: phpmyadmin
+    ports:
+      - "9087:80"
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306 
+    depends_on:
+      - mysql
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: DB889
+      MYSQL_DATABASE: softdevP
+    ports:
+      - "3307:3306" 
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./DB.sql:/docker-entrypoint-initdb.d/DB.sql
+
+volumes:
+  mysql-data:
